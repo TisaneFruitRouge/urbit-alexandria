@@ -2,5 +2,8 @@
 zod/
 bus/
 
+# Urbit login code (from +code in dojo)
+.urbit-code
+
 # macOS
 .DS_Store
