@@ -51,7 +51,7 @@ deploy:
 	rsync -av lib/  $(SSH_HOST):$(PIER)/alexandria/lib/
 	rsync -av sur/  $(SSH_HOST):$(PIER)/alexandria/sur/
 	rsync -av mar/alexandria/ $(SSH_HOST):$(PIER)/alexandria/mar/alexandria/
-	rsync -av desk.bill sys.kelvin $(SSH_HOST):$(PIER)/alexandria/
+	rsync -av desk.bill desk.docket-0 sys.kelvin $(SSH_HOST):$(PIER)/alexandria/
 	@echo ""
 	@echo "Files synced to ~hidrel. Run: make commit"
 
