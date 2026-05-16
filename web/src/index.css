@@ -1,0 +1,49 @@
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,750&family=Space+Grotesk:wght@400;500;600;700&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 42 43% 94%;
+    --foreground: 35 22% 12%;
+    --card: 38 55% 97%;
+    --card-foreground: 35 22% 12%;
+    --primary: 11 82% 43%;
+    --primary-foreground: 42 43% 96%;
+    --secondary: 178 42% 28%;
+    --secondary-foreground: 42 43% 96%;
+    --muted: 39 28% 86%;
+    --muted-foreground: 34 13% 38%;
+    --accent: 47 91% 58%;
+    --accent-foreground: 35 22% 12%;
+    --destructive: 0 74% 46%;
+    --destructive-foreground: 42 43% 96%;
+    --border: 35 20% 76%;
+    --input: 35 20% 76%;
+    --ring: 11 82% 43%;
+    --radius: 18px;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply min-h-screen bg-background font-body text-foreground antialiased;
+    background:
+      radial-gradient(circle at 12% 8%, rgba(255, 196, 56, 0.5), transparent 28rem),
+      radial-gradient(circle at 88% 14%, rgba(34, 120, 116, 0.28), transparent 26rem),
+      linear-gradient(135deg, hsl(var(--background)), #f7e7cf 52%, #ead2b1);
+  }
+}
+
+@layer components {
+  .paper-grain {
+    background-image:
+      linear-gradient(rgba(52, 37, 24, 0.045) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(52, 37, 24, 0.04) 1px, transparent 1px);
+    background-size: 34px 34px;
+  }
+}

@@ -1,0 +1,6 @@
+# Urbit ship data
+zod/
+bus/
+
+# macOS
+.DS_Store

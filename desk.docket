@@ -1,0 +1,10 @@
+:~
+  title+'Alexandria'
+  info+'An open, federated PDF library for Urbit — Alexandria'
+  color+0xb9.000b
+  version+[0 1 0]
+  website+'https://github.com/your-ship/library'
+  license+'MIT'
+  base+'alexandria'
+  glob-ames+[~zod 0v0]
+==
