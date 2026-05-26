@@ -140,17 +140,25 @@
       =+  !<([id=@ta =inbound-request:eyre] vase)
       =/  request=request:http  request.inbound-request
       =/  url=tape  (trip url.request)
+      =/  request-line=request-line:server
+        (parse-request-line:server url.request)
+      ?:  ?&  (gte (lent site.request-line) 2)
+              =((snag 0 site.request-line) 'apps')
+              =((snag 1 site.request-line) 'alexandria')
+          ==
+        :_  this
+        (redirect-reply:do id '/apps/alexandria/index.html')
       ?+  method.request
         :_  this  (http-reply:do id 405 "method not allowed")
         ::
         ::  GET /apps/alexandria/download?id=... — serve a locally hosted pdf
         %'GET'
-          =/  request-line=request-line:server
-            (parse-request-line:server url.request)
           =/  params=(map @t @t)
             (malt args.request-line)
+          ?^  (~(get by params) 'meta')
+            :_  this  (http-reply:do id 200 (trip (scot %p our.bowl)))
           ?~  (~(get by params) 'id')
-            :_  this  (http-reply:do id 200 "alexandria http ok")
+            :_  this  (http-reply:do id 200 "alexandria-agent BUILD-MARKER-0526-redirect ok")
           =/  bid=@ud
             (slav %ud (~(gut by params) 'id' '0'))
           =/  bk=(unit book-meta:alexandria)
@@ -178,8 +186,6 @@
           =/  hash=content-hash:alexandria
             (content-hash:do content)
           ::  parse metadata from query string
-          =/  request-line=request-line:server
-            (parse-request-line:server url.request)
           =/  params=(map @t @t)
             (malt args.request-line)
           =/  title=@t      (~(gut by params) 'title' '')
@@ -338,19 +344,22 @@
 ::
 |_  =bowl:gall
 ::
-::  +bind-http: bind the public HTTP routes used by the dev frontend.
+::  +bind-http: drop wedged legacy /apps/alexandria bindings, then bind only
+::  the agent's own file-transfer routes. Eyre requires %disconnect to come
+::  from the same duct that created the binding, so these use the old connect
+::  wires rather than new cleanup wires.
 ++  bind-http
   ^-  (list card)
   :~
-    [%pass /eyre/connect %arvo %e %connect [~ /apps/alexandria] %alexandria]
-    [%pass /eyre/connect-upload %arvo %e %connect [~ /apps/alexandria/upload] %alexandria]
-    [%pass /eyre/connect-download %arvo %e %connect [~ /apps/alexandria/download] %alexandria]
+    [%pass /eyre/connect %arvo %e %disconnect [~ /apps/alexandria]]
+    [%pass /eyre/connect-upload %arvo %e %disconnect [~ /apps/alexandria/upload]]
+    [%pass /eyre/connect-download %arvo %e %disconnect [~ /apps/alexandria/download]]
+    [%pass /eyre/connect-tilde %arvo %e %disconnect [~ /'~alexandria']]
+    [%pass /eyre/connect-tilde-upload %arvo %e %disconnect [~ /'~alexandria'/upload]]
+    [%pass /eyre/connect-tilde-download %arvo %e %disconnect [~ /'~alexandria'/download]]
     [%pass /eyre/connect-direct %arvo %e %connect [~ /alexandria] %alexandria]
     [%pass /eyre/connect-direct-upload %arvo %e %connect [~ /alexandria/upload] %alexandria]
     [%pass /eyre/connect-direct-download %arvo %e %connect [~ /alexandria/download] %alexandria]
-    [%pass /eyre/connect-tilde %arvo %e %connect [~ /'~alexandria'] %alexandria]
-    [%pass /eyre/connect-tilde-upload %arvo %e %connect [~ /'~alexandria'/upload] %alexandria]
-    [%pass /eyre/connect-tilde-download %arvo %e %connect [~ /'~alexandria'/download] %alexandria]
   ==
 ::
 ::  +content-hash: SHA-256 over exactly the uploaded PDF bytes.
@@ -426,6 +435,13 @@
   =/  body=octs  [(lent msg) (crip msg)]
   %+  give-simple-payload:app:server  id
   [[code ~[['content-type' 'text/plain']]] `body]
+::
+::  +redirect-reply: send browsers from stale exact /apps binding to glob.
+++  redirect-reply
+  |=  [id=@ta loc=@t]
+  ^-  (list card)
+  %+  give-simple-payload:app:server  id
+  [[307 ['location' loc]~] ~]
 ::
 ::  +mime-reply: single-chunk http mime response
 ++  mime-reply

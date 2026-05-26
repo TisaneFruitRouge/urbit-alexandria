@@ -2,7 +2,6 @@ import { useDeferredValue, useMemo, useState } from "react";
 import { BookOpen, Search, Sparkles } from "lucide-react";
 import { groupBookMirrors } from "@/api/alexandria";
 import type { LibraryBook } from "@/api/types";
-import { ship } from "@/api/urbit";
 import { useBooks } from "@/hooks/useBooks";
 import { formatShip } from "@/lib/utils";
 import { BookGrid } from "@/components/BookGrid";
@@ -10,6 +9,7 @@ import { PDFViewer } from "@/components/PDFViewer";
 import { ShipInput } from "@/components/ShipInput";
 import { SubscriptionsList } from "@/components/SubscriptionsList";
 import { UploadDialog } from "@/components/UploadDialog";
+import { useUrbitIdentity } from "@/hooks/useUrbitIdentity";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -22,12 +22,13 @@ export function Alexandria() {
   const [filterMode, setFilterMode] = useState<FilterMode>("all");
   const [selectedBook, setSelectedBook] = useState<LibraryBook | null>(null);
   const deferredQuery = useDeferredValue(query);
+  const identity = useUrbitIdentity();
 
   const groupedBooks = useMemo(() => groupBookMirrors(books), [books]);
 
   const filteredBooks = useMemo(() => {
     const normalizedQuery = deferredQuery.trim().toLowerCase();
-    const localShip = formatShip(ship);
+    const localShip = formatShip(identity.ship);
 
     return groupedBooks
       .filter((book) => {
@@ -44,7 +45,7 @@ export function Alexandria() {
           .includes(normalizedQuery);
       })
       .sort((a, b) => b.uploaded.localeCompare(a.uploaded));
-  }, [groupedBooks, deferredQuery, filterMode]);
+  }, [groupedBooks, deferredQuery, filterMode, identity.ship]);
 
   const selectedId = selectedBook ? selectedBook.hash || `${selectedBook.source}-${selectedBook.id}` : undefined;
 
@@ -53,7 +54,7 @@ export function Alexandria() {
       <section className="mx-auto max-w-7xl">
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1.42fr)_340px]">
           <div className="space-y-6">
-            <Hero total={groupedBooks.length} visible={filteredBooks.length} isFetching={isFetching} />
+            <Hero total={groupedBooks.length} visible={filteredBooks.length} isFetching={isFetching} ship={identity.ship} desk={identity.desk} />
             <Card className="p-4">
               <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
                 <div className="relative flex-1">
@@ -90,7 +91,7 @@ export function Alexandria() {
   );
 }
 
-function Hero({ total, visible, isFetching }: { total: number; visible: number; isFetching: boolean }) {
+function Hero({ total, visible, isFetching, ship, desk }: { total: number; visible: number; isFetching: boolean; ship: string; desk: string }) {
   return (
     <div className="relative min-h-[300px] overflow-hidden rounded-[30px] border border-border bg-foreground p-6 text-background shadow-[0_28px_90px_rgba(40,31,21,0.3)] sm:p-7">
       <div className="absolute -right-16 -top-20 h-64 w-64 rounded-full bg-accent opacity-80 blur-2xl" />
@@ -98,7 +99,7 @@ function Hero({ total, visible, isFetching }: { total: number; visible: number; 
       <div className="relative">
         <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-background/20 bg-background/10 px-4 py-2 text-sm font-semibold">
           <Sparkles className="h-4 w-4 text-accent" />
-          {formatShip(ship)} / alexandria
+          {formatShip(ship)}/{desk}
         </div>
         <h1 className="max-w-3xl font-display text-4xl font-bold leading-[0.98] tracking-tight sm:text-5xl">
           Host books and PDFs from your Urbit.

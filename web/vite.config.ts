@@ -7,8 +7,10 @@ declare const process: {
 
 const urbitUrl = process.env.VITE_URBIT_URL ?? "http://localhost";
 const shipUrls = parseShipUrls();
+const base = process.env.VITE_BASE ?? (process.env.NODE_ENV === "production" ? "/apps/alexandria/" : "/");
 
 export default defineConfig({
+  base,
   plugins: [react()],
   resolve: {
     alias: {

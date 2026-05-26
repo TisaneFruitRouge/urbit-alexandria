@@ -7,3 +7,5 @@ bus/
 
 # macOS
 .DS_Store
+
+*.zip
